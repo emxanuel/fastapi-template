@@ -84,5 +84,3 @@ def authenticate_user(
     if not verify_password(password, user.password_hash):
         return None
     return user
-
-

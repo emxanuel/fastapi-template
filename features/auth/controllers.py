@@ -31,7 +31,9 @@ def register_controller(payload: RegisterRequest, session: Session) -> UserRead:
     return UserRead.model_validate(user, from_attributes=True)
 
 
-def login_controller(payload: LoginRequest, session: Session) -> Tuple[LoginResponse, str]:
+def login_controller(
+    payload: LoginRequest, session: Session
+) -> Tuple[LoginResponse, str]:
     user = authenticate_user(session, payload.email, payload.password)
     if user is None:
         raise HTTPException(
@@ -49,4 +51,3 @@ def login_controller(payload: LoginRequest, session: Session) -> Tuple[LoginResp
     user_read = UserRead.model_validate(user, from_attributes=True)
     login_response = LoginResponse(user=user_read)
     return login_response, session_id
-

@@ -20,7 +20,9 @@ class Settings(BaseSettings):
 
     APP_NAME: str = "Project Name API"
     ENVIRONMENT: Environment = Environment.DEVELOPMENT
-    DATABASE_URL: str = "postgresql+psycopg://postgres:postgres@localhost:5432/project_name"
+    DATABASE_URL: str = (
+        "postgresql+psycopg://postgres:postgres@localhost:5432/project_name"
+    )
     LOG_LEVEL: str = "info"
     RELOAD: bool = False
     HOST: str = "0.0.0.0"
@@ -46,5 +48,6 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
+
 
 settings = get_settings()

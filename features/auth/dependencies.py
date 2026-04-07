@@ -41,4 +41,3 @@ def get_current_user_read(
     user: Users = Depends(get_current_user),
 ) -> UserRead:
     return UserRead.model_validate(user, from_attributes=True)
-

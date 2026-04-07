@@ -19,4 +19,3 @@ def get_user_id_from_session(session_id: str) -> Optional[int]:
 
 def invalidate_session(session_id: str) -> None:
     _SESSIONS.pop(session_id, None)
-

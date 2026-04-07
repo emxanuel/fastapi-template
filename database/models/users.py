@@ -12,4 +12,3 @@ class Users(SQLModel, table=True):
     password_hash: str = Field(nullable=False)
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
-

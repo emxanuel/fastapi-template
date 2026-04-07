@@ -73,4 +73,3 @@ def logout(
         )
     # Let FastAPI use the configured 204 status with an empty body.
     return None
-

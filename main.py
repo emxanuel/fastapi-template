@@ -6,7 +6,6 @@ app = create_app()
 settings = get_settings()
 
 if __name__ == "__main__":
-
     uvicorn.run(
         "main:app",
         host=settings.HOST,

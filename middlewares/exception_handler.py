@@ -1,6 +1,7 @@
 """
 Global exception handler middleware
 """
+
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
@@ -29,27 +30,27 @@ async def exception_handler_middleware(request: Request, call_next):
 async def handle_exception(request: Request, exc: Exception) -> JSONResponse:
     """
     Convert exceptions to JSON responses
-    
+
     PRIORITY ORDER:
     1. Custom business exceptions (AuthException, SDKException)
     2. FastAPI validation errors (422)
     3. Starlette HTTP exceptions
     4. Unexpected errors (500)
     """
-    
+
     request_context = {
         "method": request.method,
         "url": str(request.url),
         "client": request.client.host if request.client else "unknown",
     }
-    
+
     traceback.print_exc()
-    
+
     # Handle FastAPI validation errors
     if isinstance(exc, RequestValidationError):
         logger.warning(
             f"Validation error: {exc.errors()}",
-            extra={"errors": exc.errors(), **request_context}
+            extra={"errors": exc.errors(), **request_context},
         )
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -57,25 +58,25 @@ async def handle_exception(request: Request, exc: Exception) -> JSONResponse:
                 "error": "validation_error",
                 "message": "Invalid request data",
                 "details": exc.errors() if settings.DEBUG else None,
-                "status_code": 422
-            }
+                "status_code": 422,
+            },
         )
-    
+
     # Handle Starlette HTTP exceptions
     if isinstance(exc, StarletteHTTPException):
         logger.warning(
             f"HTTP error {exc.status_code}: {exc.detail}",
-            extra={"exception": exc, **request_context}
+            extra={"exception": exc, **request_context},
         )
         return JSONResponse(
             status_code=exc.status_code,
             content={
                 "error": "http_error",
                 "message": exc.detail,
-                "status_code": exc.status_code
-            }
+                "status_code": exc.status_code,
+            },
         )
-    
+
     # Handle SQLAlchemy / DBAPI errors (sanitize output; do not leak SQL)
     if isinstance(exc, (DBAPIError, SQLAlchemyError)):
         logger.error(
@@ -83,7 +84,9 @@ async def handle_exception(request: Request, exc: Exception) -> JSONResponse:
             extra={
                 "exception": exc,
                 "exception_type": type(exc).__name__,
-                "dbapi_type": type(getattr(exc, "orig", None)).__name__ if getattr(exc, "orig", None) else None,
+                "dbapi_type": type(getattr(exc, "orig", None)).__name__
+                if getattr(exc, "orig", None)
+                else None,
                 **request_context,
             },
             exc_info=True,
@@ -100,13 +103,12 @@ async def handle_exception(request: Request, exc: Exception) -> JSONResponse:
     # Handle unexpected errors
     error_msg = str(exc)
     # Extract underlying error for SQLAlchemy/database errors
-    if hasattr(exc, 'orig') and exc.orig:
+    if hasattr(exc, "orig") and exc.orig:
         error_msg = str(exc.orig)
     logger.error(
-        f"Unexpected error: {error_msg}",
-        extra={"exception": exc, **request_context}
+        f"Unexpected error: {error_msg}", extra={"exception": exc, **request_context}
     )
-    
+
     # In production, never expose internal error details
     if settings.ENVIRONMENT == "production":
         return JSONResponse(
@@ -114,8 +116,8 @@ async def handle_exception(request: Request, exc: Exception) -> JSONResponse:
             content={
                 "error": "internal_server_error",
                 "message": "An unexpected error occurred. Please try again later.",
-                "status_code": 500
-            }
+                "status_code": 500,
+            },
         )
     else:
         return JSONResponse(
@@ -124,29 +126,21 @@ async def handle_exception(request: Request, exc: Exception) -> JSONResponse:
                 "error": "internal_server_error",
                 "message": str(exc),
                 "type": type(exc).__name__,
-                "status_code": 500
-            }
+                "status_code": 500,
+            },
         )
 
 
 def format_error_response(
-    error_type: str,
-    message: str,
-    status_code: int = 400,
-    details: Any = None
+    error_type: str, message: str, status_code: int = 400, details: Any = None
 ) -> Dict[str, Any]:
     """
     Format error response consistently
-    
+
     """
-    response = {
-        "error": error_type,
-        "message": message,
-        "status_code": status_code
-    }
-    
+    response = {"error": error_type, "message": message, "status_code": status_code}
+
     if details is not None:
         response["details"] = details
-    
-    return response
 
+    return response
