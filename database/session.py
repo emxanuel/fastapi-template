@@ -1,6 +1,6 @@
 from collections.abc import Generator
 import logging
-from sqlmodel import Session, SQLModel, create_engine
+from sqlmodel import Session, create_engine
 
 from core.config import get_settings
 

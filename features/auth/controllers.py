@@ -39,7 +39,13 @@ def login_controller(payload: LoginRequest, session: Session) -> Tuple[LoginResp
             detail="Invalid email or password",
         )
 
-    session_id = create_session(user.id)  # type: ignore[arg-type]
+    user_id = user.id
+    if user_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Authenticated user is missing id",
+        )
+    session_id = create_session(user_id)
     user_read = UserRead.model_validate(user, from_attributes=True)
     login_response = LoginResponse(user=user_read)
     return login_response, session_id
